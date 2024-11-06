@@ -36,6 +36,6 @@ chmod +x unistall-ocserv.sh
 ```
 ## 
 
-Thank you for using Flags CSS! We hope it helps you create amazing international websites.
+Thank you for using ocserv-ubuntu! I hope it helps you to access the free internet.
 
 **Designed by ArminKiT**
