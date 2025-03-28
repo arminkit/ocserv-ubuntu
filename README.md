@@ -5,8 +5,8 @@ This Script is going to show you how to run your own VPN server by installing Op
 ```bash
 apt install nano wget -y
 wget https://raw.githubusercontent.com/arminkit/ocserv-ubuntu/refs/heads/main/install-ocserv.sh
-chmod +x install_script.sh
-./install_script.sh
+chmod +x install-ocserv.sh
+./install-ocserv.sh
 ```
 
 ## Add User
