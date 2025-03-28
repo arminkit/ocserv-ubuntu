@@ -62,6 +62,15 @@ check_pid(){
     fi
 }
 
+check_iptables(){
+    if ! command -v iptables >/dev/null 2>&1; then
+        echo -e "${Error} iptables نصب نشده است. تنظیمات فایروال اعمال نخواهد شد."
+        echo -e "${Tip} برای نصب iptables از دستور زیر استفاده کنید:\n\tapt-get install iptables -y"
+        return 1
+    fi
+    return 0
+}
+
 Get_ip(){
     ip=$(wget -qO- -t1 -T2 ipinfo.io/ip)
     if [[ -z "${ip}" ]]; then
@@ -301,8 +310,14 @@ View_Config(){
 }
 
 Add_iptables(){
-    iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport ${set_tcp_port} -j ACCEPT
-    iptables -I INPUT -m state --state NEW -m udp -p udp --dport ${set_udp_port} -j ACCEPT
+    check_iptables
+    if [[ $? -eq 0 ]]; then
+        iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport ${set_tcp_port} -j ACCEPT
+        iptables -I INPUT -m state --state NEW -m udp -p udp --dport ${set_udp_port} -j ACCEPT
+        echo -e "${Info} قوانین iptables برای پورت‌های ${set_tcp_port} و ${set_udp_port} اضافه شد."
+    else
+        echo -e "${Tip} لطفاً پورت‌های ${set_tcp_port} (TCP) و ${set_udp_port} (UDP) را به صورت دستی در فایروال خود باز کنید."
+    fi
 }
 
 Save_iptables(){
