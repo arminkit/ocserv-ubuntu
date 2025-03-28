@@ -321,16 +321,20 @@ Add_iptables(){
 }
 
 Save_iptables(){
-    iptables-save > /etc/iptables/rules.v4
+    check_iptables
+    if [[ $? -eq 0 ]]; then
+        iptables-save > /etc/iptables/rules.v4
+        echo -e "${Info} قوانین iptables ذخیره شد."
+    fi
 }
 Set_iptables(){
     echo -e "net.ipv4.ip_forward=1" >> /etc/sysctl.conf
     sysctl -p
     ifconfig_status=$(ifconfig)
     if [[ -z ${ifconfig_status} ]]; then
-        echo -e "${Error} ifconfig 未install !"
-        read -e -p "Please input your interface name manully(eth0 ens3 enpXsX venet0):" Network_card
-        [[ -z "${Network_card}" ]] && echo "Canceled..." && exit 1
+        echo -e "${Error} ifconfig نصب نشده است!"
+        read -e -p "لطفاً نام رابط شبکه را به صورت دستی وارد کنید (eth0 ens3 enpXsX venet0):" Network_card
+        [[ -z "${Network_card}" ]] && echo "لغو شد..." && exit 1
     else
         Network_card=$(ifconfig|grep "eth0")
         if [[ ! -z ${Network_card} ]]; then
@@ -345,17 +349,22 @@ Set_iptables(){
                     Network_card="venet0"
                 else
                     ifconfig
-                    read -e -p "Current network interface is not eth0 \ ens3(Debian9) \ venet0(OpenVZ) \ enpXsX(CentOS Ubuntu Latest), please manully input your NIC name:" Network_card
-                    [[ -z "${Network_card}" ]] && echo "Canceled..." && exit 1
+                    read -e -p "رابط شبکه فعلی eth0 یا ens3 یا venet0 نیست، لطفاً نام رابط را وارد کنید:" Network_card
+                    [[ -z "${Network_card}" ]] && echo "لغو شد..." && exit 1
                 fi
             fi
         fi
     fi
-    iptables -t nat -A POSTROUTING -o ${Network_card} -j MASQUERADE
-    
-    iptables-save > /etc/iptables/rules.v4
-    echo -e '#!/bin/bash\n/sbin/iptables-restore < /etc/iptables.up.rules' > /etc/network/if-pre-up.d/iptables
-    chmod +x /etc/network/if-pre-up.d/iptables
+    check_iptables
+    if [[ $? -eq 0 ]]; then
+        iptables -t nat -A POSTROUTING -o ${Network_card} -j MASQUERADE
+        iptables-save > /etc/iptables/rules.v4
+        echo -e '#!/bin/bash\n/sbin/iptables-restore < /etc/iptables.up.rules' > /etc/network/if-pre-up.d/iptables
+        chmod +x /etc/network/if-pre-up.d/iptables
+        echo -e "${Info} تنظیمات NAT و فایروال دائمی اعمال شد."
+    else
+        echo -e "${Tip} NAT فعال نشد. لطفاً به صورت دستی تنظیمات فایروال را انجام دهید."
+    fi
 }
 
 check_sys
